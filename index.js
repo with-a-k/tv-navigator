@@ -1,7 +1,6 @@
 const moment = require('moment');
 const bent = require('bent');
 const getJSON = bent('json');
-const getBuffer = bent('buffer');
 
 function formatShow(show) {
   var seasons = new Set();
@@ -14,14 +13,15 @@ function formatShow(show) {
 
     }
   };
-  console.log(show.episodes);
+  var epid = 0;
   for (episode in show.episodes) {
-    totalTime += episode.runtime * 60;
-    seasons.add(episode.season);
-    result.episodes[episode.id] = formatEpisode(episode);
+    innerEpisode = Object.values(episode)[0];
+    totalTime += innerEpisode.runtime * 60;
+    seasons.add(innerEpisode.season);
+    result.episodes[innerEpisode.id] = formatEpisode(innerEpisode);
   };
-  var episodeCount = Object.getOwnPropertyNames(seasonCounts).length;
-  result[averageEpisodesPerSeason] = episodeCount / seasons.size();
+  var episodeCount = Object.getOwnPropertyNames(show.episodes).length;
+  result["averageEpisodesPerSeason"] = Math.round(episodeCount*10.0 / seasons.size)/10;
   return result;
 }
 
@@ -43,7 +43,7 @@ function formatEpisode(episode) {
   };
 }
 
-function getStranger() {
+async function getStranger() {
   let showData = await getJSON('https://api.tvmaze.com/singlesearch/shows?q=stranger-things&embed=episodes');
   return formatShow(showData);
 }
