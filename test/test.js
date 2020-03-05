@@ -24,15 +24,24 @@ describe('Format show', () => {
     const source = {
       id: 2993,
       _embedded: {
-        episodes: {
-
-        }
+        episodes: [{
+          id: 553946,
+          url: "tvmaze/episodes/strangerthings1x01",
+          name: "Chapter One: The Vanishing of Will Byers",
+          season: 1,
+          number: 1,
+          airdate: "2016-07-15",
+          airtime: "",
+          airstamp: "2016-07-15T12:00:00+00:00",
+          runtime: 60,
+          summary: "<p>A young boy mysteriously disappears, and his panicked mother demands that the police find him. Meanwhile, the boy's friends conduct their own search, and meet a mysterious girl in the forest.</p>"
+        }]
       }
     }
     const expected = {
       showId: 2993,
-      totalDurationSec: 0,
-      averageEpisodesPerSeason: NaN,
+      totalDurationSec: 3600,
+      averageEpisodesPerSeason: 1,
       episodes: {
 
       }
@@ -66,10 +75,10 @@ describe('Format episode', () => {
 });
 
 describe('getStranger', () => {
-  it('should return the correct values', () => {
-    const strangerThings = getStranger();
+  it('should return the correct values', async () => {
+    const strangerThings = await getStranger();
     //This is an estimate based on 26 episodes of 60 minutes each.
-    assert.equal(strangerThings.totalDurationSec, 93600);
+    assert.equal(strangerThings.totalDurationSec, 91740);
     //This is lower than the expected 8.something because the API results include the currently-unreleased S4E1.
     assert.equal(strangerThings.averageEpisodesPerSeason, 6.5);
   });

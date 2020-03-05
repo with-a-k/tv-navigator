@@ -13,15 +13,14 @@ function formatShow(show) {
 
     }
   };
-  var epid = 0;
-  for (episode in show._embedded.episodes) {
-    innerEpisode = Object.values(episode)[0];
-    totalTime += innerEpisode.runtime * 60;
-    seasons.add(innerEpisode.season);
-    result.episodes[innerEpisode.id] = formatEpisode(innerEpisode);
-  };
+  show._embedded.episodes.forEach(episode => {
+    totalTime += episode.runtime * 60;
+    seasons.add(episode.season);
+    result.episodes[episode.id] = formatEpisode(episode);
+  });
   var episodeCount = show._embedded.episodes.length;
   result["averageEpisodesPerSeason"] = Math.round(episodeCount*10.0 / seasons.size)/10;
+  result["totalDurationSec"] = totalTime;
   return result;
 }
 
@@ -29,12 +28,14 @@ function formatEpisode(episode) {
   // Matches a colon, followed by a space, followed by whatever comes after it as a group.
   const chapterMatcher = new RegExp(/: (.*)$/,"i");
   // Matches an HTML "<p>" tag at the beginning of a string, followed by whatever is after it as a group up to the first period, then any whitespace.
-  const summaryMatcher = new RegExp(/^<p>(.*\.)\s/,"i");
+  const summaryMatcher = new RegExp(/^<p>(.*?\.)[\s<]/,"i");
   var sequenceNumber = `s${episode.season}e${episode.number}`;
   //RegExp.exec returns any groups in the match at index 1.
   var shortTitle = chapterMatcher.exec(episode.name)[1];
   var unixstamp = moment(episode.airstamp).unix();
-  var summary = summaryMatcher.exec(episode.summary)[1];
+  //Hellfire Club has no description.
+  var summaryMatch = summaryMatcher.exec(episode.summary)
+  var summary = (Array.isArray(summaryMatch)) ? summaryMatch[1] : "Unreleased Episode";
   return {
     sequenceNumber: sequenceNumber,
     shortTitle: shortTitle,
@@ -50,7 +51,8 @@ async function getStranger() {
   } catch(err) {
     showData = {message: "An error occurred getting the data."}
   }
-  return formatShow(showData);
+  var formatData = formatShow(showData);
+  return formatData;
 }
 
 module.exports = { getStranger, formatShow, formatEpisode };
