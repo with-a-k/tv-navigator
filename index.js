@@ -14,13 +14,13 @@ function formatShow(show) {
     }
   };
   var epid = 0;
-  for (episode in show.episodes) {
+  for (episode in show._embedded.episodes) {
     innerEpisode = Object.values(episode)[0];
     totalTime += innerEpisode.runtime * 60;
     seasons.add(innerEpisode.season);
     result.episodes[innerEpisode.id] = formatEpisode(innerEpisode);
   };
-  var episodeCount = Object.getOwnPropertyNames(show.episodes).length;
+  var episodeCount = show._embedded.episodes.length;
   result["averageEpisodesPerSeason"] = Math.round(episodeCount*10.0 / seasons.size)/10;
   return result;
 }
@@ -44,7 +44,12 @@ function formatEpisode(episode) {
 }
 
 async function getStranger() {
-  let showData = await getJSON('https://api.tvmaze.com/singlesearch/shows?q=stranger-things&embed=episodes');
+  var showData = {};
+  try {
+    showData = await getJSON('https://api.tvmaze.com/singlesearch/shows?q=stranger-things&embed=episodes');
+  } catch(err) {
+    showData = {message: "An error occurred getting the data."}
+  }
   return formatShow(showData);
 }
 

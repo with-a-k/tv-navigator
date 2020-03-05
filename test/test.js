@@ -23,8 +23,10 @@ describe('Format show', () => {
   it('should return JSON with a certain structure', () => {
     const source = {
       id: 2993,
-      episodes: {
+      _embedded: {
+        episodes: {
 
+        }
       }
     }
     const expected = {
